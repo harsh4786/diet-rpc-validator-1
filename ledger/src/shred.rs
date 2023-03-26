@@ -202,28 +202,28 @@ enum ShredVariant {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct ShredCommonHeader {
     // making struct public
-    signature: Signature,
-    shred_variant: ShredVariant,
-    slot: Slot,
-    index: u32,
-    version: u16,
-    fec_set_index: u32,
+   pub signature: Signature,
+   pub shred_variant: ShredVariant,
+   pub slot: Slot,
+   pub index: u32,
+   pub version: u16,
+   pub fec_set_index: u32,
 }
 
 /// The data shred header has parent offset and flags
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
-struct DataShredHeader {
-    parent_offset: u16,
-    flags: ShredFlags,
-    size: u16, // common shred header + data shred header + data
+pub struct DataShredHeader {
+   pub parent_offset: u16,
+   pub flags: ShredFlags,
+   pub size: u16, // common shred header + data shred header + data
 }
 
 /// The coding shred header has FEC information
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
-struct CodingShredHeader {
-    num_data_shreds: u16,
-    num_coding_shreds: u16,
-    position: u16, // [0..num_coding_shreds)
+pub struct CodingShredHeader {
+   pub num_data_shreds: u16,
+   pub num_coding_shreds: u16,
+   pub position: u16, // [0..num_coding_shreds)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
