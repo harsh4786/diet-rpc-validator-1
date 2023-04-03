@@ -66,7 +66,9 @@ impl GeyserPluginService {
     ///    shall create the implementation of `GeyserPlugin` and returns to the caller.
     ///    The rest of the JSON fields' definition is up to to the concrete plugin implementation
     ///    It is usually used to configure the connection information for the external data store.
-
+    /// Tinydancer Patch ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    /// Possibly make a ShredNotification receiver for the plugin that would listen for
+    /// Shred updates from the blockstore (hand wavy description)
     pub fn new(
         confirmed_bank_receiver: Receiver<BankNotification>,
         geyser_plugin_config_files: &[PathBuf],
