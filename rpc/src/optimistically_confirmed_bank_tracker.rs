@@ -190,7 +190,7 @@ impl OptimisticallyConfirmedBankTracker {
             }
         }
     }
-
+    // After receiving the bank notification
     pub fn process_notification(
         notification: BankNotification,
         bank_forks: &Arc<RwLock<BankForks>>,

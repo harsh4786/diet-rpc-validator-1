@@ -2,7 +2,6 @@
 mod cluster_tpu_info;
 pub mod max_slots;
 pub mod optimistically_confirmed_bank_tracker;
-pub mod blockstore_tracker;
 pub mod parsed_token_accounts;
 pub mod rpc;
 mod rpc_cache;

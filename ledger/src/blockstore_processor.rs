@@ -1846,7 +1846,7 @@ pub fn fill_blockstore_slot_with_ticks(
             0,
         )
         .unwrap();
-
+        
     last_entry_hash
 }
 

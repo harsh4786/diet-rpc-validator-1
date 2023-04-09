@@ -5460,6 +5460,7 @@ name = "solana-geyser-plugin-interface"
 version = "1.15.0"
 dependencies = [
  "log",
+ "solana-ledger",
  "solana-sdk 1.15.0",
  "solana-transaction-status",
  "thiserror",
@@ -5476,6 +5477,7 @@ dependencies = [
  "log",
  "serde_json",
  "solana-geyser-plugin-interface",
+ "solana-ledger",
  "solana-measure",
  "solana-metrics",
  "solana-rpc",

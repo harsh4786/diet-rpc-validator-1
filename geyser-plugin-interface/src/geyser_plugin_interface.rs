@@ -1,3 +1,5 @@
+use solana_sdk::slot_history::Slot;
+
 /// The interface for Geyser plugins. A plugin must implement
 /// the GeyserPlugin trait to work with the runtime.
 /// In addition, the dynamic library must export a "C" function _create_plugin which
@@ -7,6 +9,13 @@ use {
     solana_transaction_status::{Reward, TransactionStatusMeta},
     std::{any::Any, error, io},
     thiserror::Error,
+    solana_ledger::shred::{
+        ShredCommonHeader,
+        ShredFlags,
+        ShredData,
+        ShredCode,
+        Shred,
+    }
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -133,6 +142,16 @@ pub struct ReplicaBlockInfo<'a> {
     pub block_height: Option<u64>,
 }
 
+#[derive(Clone, Debug)]
+pub struct ReplicaShredInfo{
+    pub slot: Slot,
+    pub shred: Vec<Option<ReplicaShred>>,
+}
+#[derive(Clone, Debug)]
+pub enum ReplicaShred{
+   ShredCode(ShredCode),    
+   ShredData(ShredData),
+}
 pub enum ReplicaBlockInfoVersions<'a> {
     V0_0_1(&'a ReplicaBlockInfo<'a>),
 }
