@@ -51,6 +51,7 @@ pub struct GeyserPluginService {
     accounts_update_notifier: Option<AccountsUpdateNotifier>,
     transaction_notifier: Option<TransactionNotifierLock>,
     block_metadata_notifier: Option<BlockMetadataNotifierLock>,
+//  shred_notifier: Option<ShredNotifierLock>,
 }
 
 impl GeyserPluginService {
@@ -71,6 +72,7 @@ impl GeyserPluginService {
     /// Shred updates from the blockstore (hand wavy description)
     pub fn new(
         confirmed_bank_receiver: Receiver<BankNotification>,
+        das_receiver: Receiver<Vec<PacketBatch>>,
         geyser_plugin_config_files: &[PathBuf],
     ) -> Result<Self, GeyserPluginServiceError> {
         info!(
@@ -123,6 +125,8 @@ impl GeyserPluginService {
         } else {
             (None, None)
         };
+        //TODO: Add shred notifier support here: 👇
+
 
         info!("Started GeyserPluginService");
         Ok(GeyserPluginService {
@@ -131,6 +135,7 @@ impl GeyserPluginService {
             accounts_update_notifier,
             transaction_notifier,
             block_metadata_notifier,
+            //shred_notifier
         })
     }
 
@@ -202,7 +207,9 @@ impl GeyserPluginService {
     pub fn get_block_metadata_notifier(&self) -> Option<BlockMetadataNotifierLock> {
         self.block_metadata_notifier.clone()
     }
-
+    /*
+    pub fn get_shred_notifier(&self) -> Option<ShredNotifierLock> {}    
+     */
     pub fn join(self) -> thread::Result<()> {
         if let Some(mut slot_status_observer) = self.slot_status_observer {
             slot_status_observer.join()?;

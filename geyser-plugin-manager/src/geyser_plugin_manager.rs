@@ -72,4 +72,14 @@ impl GeyserPluginManager {
         }
         false
     }
+
+    /// Check if there is any plugin interested in shreds
+    pub fn shred_updates_enabled(&self) -> bool {
+        for plugin in &self.plugins {
+            if plugin.shreds_updates_enabled(){
+                return true;
+            }
+        }
+        false
+    }
 }

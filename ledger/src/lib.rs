@@ -17,7 +17,8 @@ pub mod blockstore_metrics;
 pub mod blockstore_options;
 pub mod blockstore_processor;
 //tiny geyser patch
-pub mod blockstore_tracker;
+pub mod shred_tracker;
+
 pub mod builtins;
 pub mod genesis_utils;
 pub mod leader_schedule;

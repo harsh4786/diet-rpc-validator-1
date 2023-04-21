@@ -395,13 +395,16 @@ impl Validator {
         }
 
         let mut bank_notification_senders = Vec::new();
-
+//      let mut shred_notification_senders = Vec::new();
         let geyser_plugin_service =
             if let Some(geyser_plugin_config_files) = &config.geyser_plugin_config_files {
                 let (confirmed_bank_sender, confirmed_bank_receiver) = unbounded();
+                //tinydancer patch
+                let (das_sender, das_receiver) = unbounded();
+
                 bank_notification_senders.push(confirmed_bank_sender);
                 let result =
-                    GeyserPluginService::new(confirmed_bank_receiver, geyser_plugin_config_files);
+                    GeyserPluginService::new(confirmed_bank_receiver, das_receiver, geyser_plugin_config_files);
                 match result {
                     Ok(geyser_plugin_service) => Some(geyser_plugin_service),
                     Err(err) => {

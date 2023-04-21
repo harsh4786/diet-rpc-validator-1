@@ -159,6 +159,7 @@ impl Tvu {
         );
 
         let (verified_sender, verified_receiver) = unbounded();
+        let (das_sender, das_receiver) = unbounded();
         let (retransmit_sender, retransmit_receiver) = unbounded();
         let shred_sigverify = sigverify_shreds::spawn_shred_sigverify(
             cluster_info.id(),
@@ -167,6 +168,7 @@ impl Tvu {
             fetch_receiver,
             retransmit_sender.clone(),
             verified_sender,
+            das_sender,
             turbine_disabled,
         );
 

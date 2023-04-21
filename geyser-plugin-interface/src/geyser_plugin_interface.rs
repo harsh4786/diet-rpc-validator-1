@@ -278,6 +278,11 @@ pub trait GeyserPlugin: Any + Send + Sync + std::fmt::Debug {
     fn notify_block_metadata(&mut self, blockinfo: ReplicaBlockInfoVersions) -> Result<()> {
         Ok(())
     }
+    /// To be called when confirmed shreds are recorded in the blockstore.
+    #[allow(unused_variables)]
+    fn notify_shred_updates(&mut self, shred_updates: ReplicaShredInfo) -> Result<()> {
+        Ok(())
+    }
 
     /// Check if the plugin is interested in account data
     /// Default is true -- if the plugin is not interested in
@@ -292,4 +297,11 @@ pub trait GeyserPlugin: Any + Send + Sync + std::fmt::Debug {
     fn transaction_notifications_enabled(&self) -> bool {
         false
     }
+    /// Check if the plugin is interested in shreds
+    /// Default is false -- if the plugin is not interested in
+    /// shreds, please return false.
+    fn shreds_updates_enabled(&self) -> bool {
+        false
+    }
+    
 }

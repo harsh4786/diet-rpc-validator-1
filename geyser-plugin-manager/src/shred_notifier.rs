@@ -1,3 +1,5 @@
+use solana_ledger::blockstore::Blockstore;
+
 use {
     crate::geyser_plugin_manager::GeyserPluginManager,
     log::*,
@@ -10,11 +12,12 @@ use {
 
 
 pub trait ShredNotifierInterface {
-     fn notify_shreds_for_slot(&self, slot: Slot);
+     fn notify_shreds(&self);
+     fn notify_shreds_for_slot(&self, slot: Slot, blockstore: &Blockstore);
 }
 
 
-pub type ShredNotifier = Arc<RwLock<dyn ShredNotifierInterface + Send + Sync>>;
+pub type ShredNotifierLock = Arc<RwLock<dyn ShredNotifierInterface + Send + Sync>>;
 
 pub struct ShredNotifierImpl{
     plugin_manager: Arc<RwLock<GeyserPluginManager>>,
@@ -25,8 +28,12 @@ impl ShredNotifierImpl{
     pub fn new(plugin_manager: Arc<RwLock<GeyserPluginManager>>) -> Self {
         Self { plugin_manager }
     }
-    pub fn notify_shreds_for_slot(&self, slot: Slot){
-        
-    }
 
+}
+
+impl ShredNotifierInterface for ShredNotifier{
+    fn notify_shreds(&self) { todo!()}
+    fn notify_shreds_for_slot(&self, slot: Slot, blockstore: &Blockstore) {
+        todo!()
+    }
 }
