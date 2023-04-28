@@ -31,8 +31,10 @@ impl ShredNotifierImpl{
 
 }
 
-impl ShredNotifierInterface for ShredNotifier{
-    fn notify_shreds(&self) { todo!()}
+impl ShredNotifierInterface for ShredNotifierImpl{
+    fn notify_shreds(&self) {
+         todo!()
+    }
     fn notify_shreds_for_slot(&self, slot: Slot, blockstore: &Blockstore) {
         todo!()
     }

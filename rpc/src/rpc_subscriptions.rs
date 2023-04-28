@@ -98,6 +98,7 @@ pub enum NotificationEntry {
     Root(Slot),
     Bank(CommitmentSlots),
     Gossip(Slot),
+   // Shred((Slot, Shred)),
     SignaturesReceived((Slot, Vec<Signature>)),
     Subscribed(SubscriptionParams, SubscriptionId),
     Unsubscribed(SubscriptionParams, SubscriptionId),

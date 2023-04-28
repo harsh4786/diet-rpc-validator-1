@@ -1,6 +1,8 @@
 //! The `retransmit_stage` retransmits shreds between validators
 #![allow(clippy::rc_buffer)]
 
+use std::net::SocketAddr;
+
 use {
     crate::{
         cluster_nodes::{ClusterNodes, ClusterNodesCache},
@@ -178,6 +180,7 @@ fn retransmit(
     packet_hasher: &mut PacketHasher,
     max_slots: &MaxSlots,
     rpc_subscriptions: Option<&RpcSubscriptions>,
+    da_shred_receiver_addr: Option<SocketAddr>,
 ) -> Result<(), RecvTimeoutError> {
     const RECV_TIMEOUT: Duration = Duration::from_secs(1);
     let mut shreds = shreds_receiver.recv_timeout(RECV_TIMEOUT)?;
@@ -256,6 +259,7 @@ fn retransmit(
                     socket_addr_space,
                     &sockets[index % sockets.len()],
                     stats,
+                    da_shred_receiver_addr
                 );
                 (key.slot(), root_distance, num_nodes)
             })
@@ -275,6 +279,7 @@ fn retransmit(
                         socket_addr_space,
                         &sockets[index % sockets.len()],
                         stats,
+                        da_shred_receiver_addr,
                     );
                     (key.slot(), root_distance, num_nodes)
                 })
@@ -298,10 +303,14 @@ fn retransmit_shred(
     socket_addr_space: &SocketAddrSpace,
     socket: &UdpSocket,
     stats: &RetransmitStats,
+    da_shred_receiver_addr: Option<SocketAddr>
 ) -> (/*root_distance:*/ usize, /*num_nodes:*/ usize) {
     let mut compute_turbine_peers = Measure::start("turbine_start");
-    let (root_distance, addrs) =
+    let (root_distance, mut addrs) =
         cluster_nodes.get_retransmit_addrs(slot_leader, key, root_bank, DATA_PLANE_FANOUT);
+    if let Some(addr) = da_shred_receiver_addr {
+            addrs.push(addr);
+    }
     let addrs: Vec<_> = addrs
         .into_iter()
         .filter(|addr| ContactInfo::is_valid_address(addr, socket_addr_space))
@@ -351,6 +360,7 @@ pub fn retransmitter(
     shreds_receiver: Receiver<Vec</*shred:*/ Vec<u8>>>,
     max_slots: Arc<MaxSlots>,
     rpc_subscriptions: Option<Arc<RpcSubscriptions>>,
+    da_shred_receiver_addr: Option<SocketAddr>,
 ) -> JoinHandle<()> {
     let cluster_nodes_cache = ClusterNodesCache::<RetransmitStage>::new(
         CLUSTER_NODES_CACHE_NUM_EPOCH_CAP,
@@ -384,6 +394,7 @@ pub fn retransmitter(
                 &mut packet_hasher,
                 &max_slots,
                 rpc_subscriptions.as_deref(),
+                da_shred_receiver_addr,
             ) {
                 Ok(()) => (),
                 Err(RecvTimeoutError::Timeout) => (),
@@ -406,6 +417,7 @@ impl RetransmitStage {
         retransmit_receiver: Receiver<Vec</*shred:*/ Vec<u8>>>,
         max_slots: Arc<MaxSlots>,
         rpc_subscriptions: Option<Arc<RpcSubscriptions>>,
+        da_shred_receiver_addr: Option<SocketAddr>,
     ) -> Self {
         let retransmit_thread_handle = retransmitter(
             retransmit_sockets,
@@ -415,6 +427,7 @@ impl RetransmitStage {
             retransmit_receiver,
             max_slots,
             rpc_subscriptions,
+            da_shred_receiver_addr,
         );
 
         Self {

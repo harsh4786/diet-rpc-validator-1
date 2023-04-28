@@ -7,7 +7,6 @@
 //! paralellizable components (i.e. [SigVerify](sigverify/index.html)).  It also includes
 //! command-line tools to spin up validators and a Rust library
 //!
-
 pub mod accounts_hash_verifier;
 pub mod ancestor_hashes_service;
 pub mod banking_stage;

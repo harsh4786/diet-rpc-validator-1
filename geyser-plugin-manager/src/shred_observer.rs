@@ -1,5 +1,5 @@
 use {
-    solana_ledger::shred_tracker::*,
+    solana_rpc::shred_tracker::*,
     crossbeam_channel::Receiver,
     std::{
         sync::{

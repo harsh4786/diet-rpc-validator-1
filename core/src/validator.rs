@@ -176,6 +176,7 @@ pub struct ValidatorConfig {
     pub ledger_column_options: LedgerColumnOptions,
     pub runtime_config: RuntimeConfig,
     pub replay_slots_concurrently: bool,
+    pub da_shred_receiver_addr: Option<SocketAddr>,
 }
 
 impl Default for ValidatorConfig {
@@ -238,6 +239,7 @@ impl Default for ValidatorConfig {
             ledger_column_options: LedgerColumnOptions::default(),
             runtime_config: RuntimeConfig::default(),
             replay_slots_concurrently: false,
+            da_shred_receiver_addr: None,
         }
     }
 }
@@ -400,11 +402,9 @@ impl Validator {
             if let Some(geyser_plugin_config_files) = &config.geyser_plugin_config_files {
                 let (confirmed_bank_sender, confirmed_bank_receiver) = unbounded();
                 //tinydancer patch
-                let (das_sender, das_receiver) = unbounded();
-
                 bank_notification_senders.push(confirmed_bank_sender);
                 let result =
-                    GeyserPluginService::new(confirmed_bank_receiver, das_receiver, geyser_plugin_config_files);
+                    GeyserPluginService::new(confirmed_bank_receiver, geyser_plugin_config_files);
                 match result {
                     Ok(geyser_plugin_service) => Some(geyser_plugin_service),
                     Err(err) => {
@@ -984,6 +984,7 @@ impl Validator {
             config.runtime_config.log_messages_bytes_limit,
             &connection_cache,
             &prioritization_fee_cache,
+            config.da_shred_receiver_addr,
         )?;
 
         let tpu = Tpu::new(

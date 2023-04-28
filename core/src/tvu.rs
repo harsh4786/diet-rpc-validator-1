@@ -1,6 +1,8 @@
 //! The `tvu` module implements the Transaction Validation Unit, a multi-stage transaction
 //! validation pipeline in software.
 
+use solana_perf::packet::PacketBatch;
+
 use {
     crate::{
         broadcast_stage::RetransmitSlotsSender,
@@ -39,6 +41,10 @@ use {
     solana_rpc::{
         max_slots::MaxSlots, optimistically_confirmed_bank_tracker::BankNotificationSender,
         rpc_subscriptions::RpcSubscriptions,
+        shred_tracker::{
+            ShredNotification,
+            ShredTracker,
+        },
     },
     solana_runtime::{
         accounts_background_service::AbsRequestSender, bank_forks::BankForks,
@@ -48,7 +54,7 @@ use {
     solana_sdk::{clock::Slot, pubkey::Pubkey, signature::Keypair},
     std::{
         collections::HashSet,
-        net::UdpSocket,
+        net::{UdpSocket, SocketAddr},
         sync::{atomic::AtomicBool, Arc, RwLock},
         thread::{self, JoinHandle},
     },
@@ -66,6 +72,7 @@ pub struct Tvu {
     voting_service: VotingService,
     warm_quic_cache_service: Option<WarmQuicCacheService>,
     drop_bank_service: DropBankService,
+    shred_tracker: Option<ShredTracker>,
 }
 
 pub struct TvuSockets {
@@ -131,6 +138,7 @@ impl Tvu {
         log_messages_bytes_limit: Option<usize>,
         connection_cache: &Arc<ConnectionCache>,
         prioritization_fee_cache: &Arc<PrioritizationFeeCache>,
+        da_shred_receiver_addr: Option<SocketAddr>,
     ) -> Result<Self, String> {
         let TvuSockets {
             repair: repair_socket,
@@ -159,8 +167,9 @@ impl Tvu {
         );
 
         let (verified_sender, verified_receiver) = unbounded();
-        let (das_sender, das_receiver) = unbounded();
+        //let (das_sender, das_receiver) = unbounded();
         let (retransmit_sender, retransmit_receiver) = unbounded();
+        let (das_sender, das_receiver) = unbounded();
         let shred_sigverify = sigverify_shreds::spawn_shred_sigverify(
             cluster_info.id(),
             bank_forks.clone(),
@@ -180,8 +189,10 @@ impl Tvu {
             retransmit_receiver,
             max_slots.clone(),
             Some(rpc_subscriptions.clone()),
+            da_shred_receiver_addr,
         );
-
+    
+        let shred_tracker = ShredTracker::new(das_receiver,  exit,None,None);
         let cluster_slots = Arc::new(ClusterSlots::default());
         let (duplicate_slots_reset_sender, duplicate_slots_reset_receiver) = unbounded();
         let (duplicate_slots_sender, duplicate_slots_receiver) = unbounded();
@@ -317,6 +328,7 @@ impl Tvu {
             voting_service,
             warm_quic_cache_service,
             drop_bank_service,
+            shred_tracker: Some(shred_tracker),
         })
     }
 

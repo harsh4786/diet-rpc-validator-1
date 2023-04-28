@@ -5,6 +5,7 @@ use {
         block_metadata_notifier_interface::BlockMetadataNotifierLock,
         geyser_plugin_manager::GeyserPluginManager, slot_status_notifier::SlotStatusNotifierImpl,
         slot_status_observer::SlotStatusObserver, transaction_notifier::TransactionNotifierImpl,
+        shred_notifier::{ShredNotifierImpl, ShredNotifierInterface, ShredNotifierLock},
     },
     crossbeam_channel::Receiver,
     log::*,
@@ -12,6 +13,7 @@ use {
         optimistically_confirmed_bank_tracker::BankNotification,
         transaction_notifier_interface::TransactionNotifierLock,
     },
+    solana_perf::packet::{Packet, PacketBatch},
     solana_runtime::accounts_update_notifier_interface::AccountsUpdateNotifier,
     std::{
         fs::File,
@@ -72,7 +74,7 @@ impl GeyserPluginService {
     /// Shred updates from the blockstore (hand wavy description)
     pub fn new(
         confirmed_bank_receiver: Receiver<BankNotification>,
-        das_receiver: Receiver<Vec<PacketBatch>>,
+       // das_receiver: Receiver<Vec<PacketBatch>>,
         geyser_plugin_config_files: &[PathBuf],
     ) -> Result<Self, GeyserPluginServiceError> {
         info!(
@@ -126,7 +128,7 @@ impl GeyserPluginService {
             (None, None)
         };
         //TODO: Add shred notifier support here: 👇
-
+        // let shred_notifier: Option<ShredNotifierLock> =
 
         info!("Started GeyserPluginService");
         Ok(GeyserPluginService {

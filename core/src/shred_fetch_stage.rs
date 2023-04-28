@@ -50,8 +50,10 @@ impl ShredFetchStage {
 
         let mut stats = ShredFetchStats::default();
         let mut packet_hasher = PacketHasher::default();
-
+        // the start of the modifications of the PacketBatches
         for mut packet_batch in recvr {
+            // checks if the elapsed time is more than the 400ms per slot, if yes then it updates it 
+            // with recent time.
             if last_updated.elapsed().as_millis() as u64 > DEFAULT_MS_PER_SLOT {
                 last_updated = Instant::now();
                 packet_hasher.reset();
