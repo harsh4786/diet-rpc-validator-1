@@ -67,6 +67,11 @@ use {
         rpc_subscriptions::RpcSubscriptions,
         transaction_notifier_interface::TransactionNotifierLock,
         transaction_status_service::TransactionStatusService,
+        shred_tracker::{
+            ShredNotification,
+            ShredNotificationSender,
+            ShredNotificationReceiver,
+        }
     },
     solana_runtime::{
         accounts_background_service::{
@@ -395,16 +400,15 @@ impl Validator {
                 ));
             }
         }
-
+        let (shred_notification_sender, shred_notification_receiver) = unbounded();
         let mut bank_notification_senders = Vec::new();
-//      let mut shred_notification_senders = Vec::new();
         let geyser_plugin_service =
             if let Some(geyser_plugin_config_files) = &config.geyser_plugin_config_files {
                 let (confirmed_bank_sender, confirmed_bank_receiver) = unbounded();
                 //tinydancer patch
                 bank_notification_senders.push(confirmed_bank_sender);
                 let result =
-                    GeyserPluginService::new(confirmed_bank_receiver, geyser_plugin_config_files);
+                    GeyserPluginService::new(confirmed_bank_receiver, shred_notification_receiver, geyser_plugin_config_files);
                 match result {
                     Ok(geyser_plugin_service) => Some(geyser_plugin_service),
                     Err(err) => {
@@ -784,6 +788,8 @@ impl Validator {
             } else {
                 None
             };
+            //Nano geyser patch
+            
 
             let json_rpc_service = JsonRpcService::new(
                 rpc_addr,
@@ -936,6 +942,11 @@ impl Validator {
         );
 
         let (replay_vote_sender, replay_vote_receiver) = unbounded();
+        let shred_notification_subscribers = if !shred_notification_senders.is_empty(){
+            Some(Arc::new(RwLock::new(shred_notification_sender)))
+         } else{
+            None
+         };
         let tvu = Tvu::new(
             vote_account,
             authorized_voter_keypairs,
@@ -985,6 +996,7 @@ impl Validator {
             &connection_cache,
             &prioritization_fee_cache,
             config.da_shred_receiver_addr,
+            shred_notification_subscribers,
         )?;
 
         let tpu = Tpu::new(

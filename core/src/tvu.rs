@@ -44,6 +44,8 @@ use {
         shred_tracker::{
             ShredNotification,
             ShredTracker,
+            ShredNotificationSender,
+            ShredNotificationReceiver,
         },
     },
     solana_runtime::{
@@ -139,6 +141,7 @@ impl Tvu {
         connection_cache: &Arc<ConnectionCache>,
         prioritization_fee_cache: &Arc<PrioritizationFeeCache>,
         da_shred_receiver_addr: Option<SocketAddr>,
+        shred_notification_subscribers: Option<Arc<RwLock<Vec<ShredNotificationSender>>>>
     ) -> Result<Self, String> {
         let TvuSockets {
             repair: repair_socket,
@@ -192,7 +195,7 @@ impl Tvu {
             da_shred_receiver_addr,
         );
     
-        let shred_tracker = ShredTracker::new(das_receiver,  exit,None,None);
+        let shred_tracker = ShredTracker::new(das_receiver,  exit,None, shred_notification_subscribers);
         let cluster_slots = Arc::new(ClusterSlots::default());
         let (duplicate_slots_reset_sender, duplicate_slots_reset_receiver) = unbounded();
         let (duplicate_slots_sender, duplicate_slots_receiver) = unbounded();

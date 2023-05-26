@@ -1,4 +1,4 @@
-///TODO!
+///A shred tracking service to track shreds from the sigverify_stage
 use std::{
     // collections::HashSet,
     sync::{
@@ -53,7 +53,7 @@ impl ShredTracker {
         let num_threads = get_thread_count().min(8);
         let thread_pool = ThreadPoolBuilder::new()
         .num_threads(num_threads)
-        .thread_name(|i| format!("solRetransmit{i:02}"))
+        .thread_name(|i| format!("shredTracket101"))
         .build()
         .unwrap();
         let thread_hdl =  Builder::new()
@@ -108,7 +108,9 @@ impl ShredTracker {
                       if let Some(shred_notification_subscribers) = shred_notification_subscribers{
                         for sender in shred_notification_subscribers.read().unwrap().iter(){
                             match sender.send(data_shred_notif.clone()){
-                                Ok(_) => {},
+                                Ok(_) => { 
+                                    info!("Received Shreds for Slot {:?}", filter_slot)
+                                },
                                 Err(err) => {
                                     info!(
                                         "Failed to send notification {:?}, error: {:?}",
